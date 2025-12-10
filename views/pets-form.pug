@@ -1,0 +1,21 @@
+doctype html
+html
+  head
+    title= title
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    link(rel="stylesheet", href="/css/style.css")
+  body
+    h1= title
+
+    .form-wrapper
+      form(action=action method="POST")
+        label Pet Name
+        input(type="text", name="pet_name", value=(pet ? pet.properties.pet_name : ""))
+
+        label Pet Type
+        input(type="text", name="pet_type", value=(pet ? pet.properties.pet_type : ""))
+
+        label Age
+        input(type="text", name="age", value=(pet ? pet.properties.age : ""))
+
+        input(type="submit", value="Save")
