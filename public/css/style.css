@@ -1,35 +1,133 @@
 body {
-  font-family: Georgia, serif;
-  margin: 40px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 30px;
+  color: #333;
 }
 
 h1 {
-  font-size: 48px;
-  margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  color: #2c3e50;
 }
 
-.top-link {
-  font-size: 20px;
-  display: inline-block;
+form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
   margin-bottom: 25px;
 }
 
+form input, form button {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+form button {
+  background: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+form button:hover {
+  background: #2980b9;
+}
+
+/* Table */
 table {
-  width: 90%;
+  width: 100%;
   border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+thead {
+  background: #2c3e50;
+  color: white;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+tbody tr:nth-child(even) {
+  background: #f2f5f7;
+}
+
+/* Buttons */
+button {
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.editBtn {
+  background: #f39c12;
+  color: white;
+}
+
+.editBtn:hover {
+  background: #d68910;
+}
+
+.saveBtn {
+  background: #27ae60;
+  color: white;
+}
+
+.saveBtn:hover {
+  background: #1e8449;
+}
+
+.cancelBtn {
+  background: #7f8c8d;
+  color: white;
+}
+
+.cancelBtn:hover {
+  background: #707b7c;
+}
+
+.deleteBtn {
+  background: #e74c3c;
+  color: white;
+}
+
+.deleteBtn:hover {
+  background: #c0392b;
+}
+
+/* Inputs inside table */
+td.edit input {
+  width: 90%;
+  padding: 7px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+p {
+  text-align: center;
+  color: #888;
   margin-top: 20px;
 }
 
-th {
-  background-color: pink;
-  font-size: 22px;
-  padding: 10px;
-  border: 2px solid #000;
-  text-align: center;
-}
+/* Responsive table */
+@media (max-width: 600px) {
+  table, th, td {
+    font-size: 13px;
+  }
 
-td {
-  padding: 10px;
-  font-size: 20px;
-  border: 2px solid #000;
-}
+  form {
+    flex-direc

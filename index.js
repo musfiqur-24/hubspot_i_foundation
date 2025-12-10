@@ -1,114 +1,121 @@
 require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
-const bodyParser = require("body-parser");
 const path = require("path");
 
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public"));
-app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "views"));
-
-const HUBSPOT_API = "https://api.hubapi.com/crm/v3/objects";
-const ACCESS_TOKEN = process.env.PRIVATE_APP_ACCESS;
+const PRIVATE_APP_ACCESS = process.env.PRIVATE_APP_ACCESS;
 const OBJECT_TYPE_ID = process.env.OBJECT_TYPE_ID;
-const PET_PROPERTIES = process.env.PET_PROPERTIES.split(",");
 
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-// GET Pets + Pagination
+// Template engine
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "pug");
+
+// HOME PAGE — GET LIST OF CUSTOM OBJECT RECORDS
 
 app.get("/", async (req, res) => {
-    const after = req.query.after || null;
+  try {
+    const url = `https://api.hubapi.com/crm/v3/objects/${OBJECT_TYPE_ID}?limit=100&properties=pet_name&properties=pet_type&properties=age`;
 
-    try {
-        const response = await axios.get(
-            `${HUBSPOT_API}/${OBJECT_TYPE_ID}`,
-            {
-                headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
-                params: {
-                    properties: PET_PROPERTIES.join(","),
-                    limit: 10,
-                    after: after ? after : undefined
-                }
-            }
-        );
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-        const pets = response.data.results;
-        const nextPage = response.data.paging?.next?.after || null;
-
-        res.render("pets", {
-            pets,
-            nextPage,
-            after
-        });
-
-    } catch (err) {
-        console.error(err.response?.data || err);
-        res.send("Error fetching pets");
-    }
+    res.render("homepage", {
+      pets: response.data.results || [],
+    });
+  } catch (err) {
+    console.log("GET Error:", err.response?.data || err);
+    res.render("homepage", { pets: [] });
+  }
 });
 
-// CREATE Pet
+// UPDATE PAGE (ADD + EDIT)
 
-app.post("/create", async (req, res) => {
-    const { pet_name, pet_type, age } = req.body;
+app.get("/update-cobj", async (req, res) => {
+  const id = req.query.id;
 
-    try {
-        await axios.post(
-            `${HUBSPOT_API}/${OBJECT_TYPE_ID}`,
-            {
-                properties: { pet_name, pet_type, age }
-            },
-            {
-                headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }
-            }
-        );
+  if (!id) {
+    return res.render("updates", {
+      title: "Update Custom Object Form | Integrating With HubSpot I Practicum",
+      data: null,
+      id: null,
+    });
+  }
 
-        res.redirect("/");
-    } catch (err) {
-        console.error(err.response?.data || err);
-        res.send("Error creating pet");
-    }
+  try {
+    const record = await axios.get(
+      `https://api.hubapi.com/crm/v3/objects/${OBJECT_TYPE_ID}/${id}?properties=pet_name&properties=pet_type&properties=age`,
+      {
+        headers: {
+          Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    res.render("updates", {
+      title: "Update Custom Object Form | Integrating With HubSpot I Practicum",
+      data: record.data.properties,
+      id,
+    });
+  } catch (err) {
+    console.log("Edit GET Error:", err.response?.data || err);
+    res.send("Error loading record for editing");
+  }
 });
 
-// UPDATE Pet
-
-app.post("/update", async (req, res) => {
+// CREATE OR UPDATE RECORD (POST /update-cobj)
+app.post("/update-cobj", async (req, res) => {
+  try {
     const { id, pet_name, pet_type, age } = req.body;
 
-    try {
-        await axios.patch(
-            `${HUBSPOT_API}/${OBJECT_TYPE_ID}/${id}`,
-            { properties: { pet_name, pet_type, age } },
-            {
-                headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }
-            }
-        );
+    const payload = {
+      properties: { pet_name, pet_type, age },
+    };
 
-        res.redirect("/");
-    } catch (err) {
-        console.error(err.response?.data || err);
-        res.send("Error updating pet");
+    if (id) {
+      // ---------------- UPDATE EXISTING RECORD ----------------
+      await axios.patch(
+        `https://api.hubapi.com/crm/v3/objects/${OBJECT_TYPE_ID}/${id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } else {
+      // ---------------- CREATE NEW RECORD ----------------
+      await axios.post(
+        `https://api.hubapi.com/crm/v3/objects/${OBJECT_TYPE_ID}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
-});
-// DELETE Pet
-app.get("/delete/:id", async (req, res) => {
-    try {
-        await axios.delete(
-            `${HUBSPOT_API}/${OBJECT_TYPE_ID}/${req.params.id}`,
-            {
-                headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }
-            }
-        );
-        res.redirect("/");
-    } catch (err) {
-        console.error(err.response?.data || err);
-        res.send("Error deleting pet");
-    }
+
+    res.redirect("/");
+  } catch (err) {
+    console.log("Create/Update Error:", err.response?.data || err);
+    res.status(400).send("Error saving record");
+  }
 });
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server running on http://localhost:${process.env.PORT}`);
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Server running on port 3000");
 });

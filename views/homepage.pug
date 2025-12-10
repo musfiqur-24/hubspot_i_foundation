@@ -1,0 +1,31 @@
+
+html
+  head
+    title Pets List
+    link(rel="stylesheet", href="/css/style.css") 
+  body
+    h1 Pets  Records
+
+    a(href="/update-cobj" class="btn-add") Add / Update to this table
+
+    table(border="1" cellpadding="10" cellspacing="0")
+      thead
+        tr
+          th Pet Name
+          th Pet Type
+          th Age
+          th Actions
+      tbody
+        if pets.length === 0
+          tr
+            td(colspan="4") No records found.
+        else
+          each r in pets
+            tr
+              td= r.properties.pet_name || "-"
+              td= r.properties.pet_type || "-"
+              td= r.properties.age || "-"
+              td
+                a(href="/update-cobj?id=" + r.id class="btn-edit") Edit
+                
+                
