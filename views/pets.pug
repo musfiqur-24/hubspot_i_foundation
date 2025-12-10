@@ -1,53 +1,43 @@
-doctype html
 html
   head
-    title Pets Table
-    style.
-      body {
-        font-family: Arial, sans-serif;
-        padding: 30px;
-      }
-      h1 {
-        font-size: 40px;
-        margin-bottom: 20px;
-      }
-      table {
-        width: 80%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        font-size: 20px;
-      }
-      th, td {
-        border: 1px solid #ccc;
-        padding: 12px;
-      }
-      th {
-        background: #ffccd2;
-        text-align: center;
-        font-weight: bold;
-      }
-      a {
-        font-size: 22px;
-      }
+    link(rel="stylesheet", href="/css/style.css")
 
   body
-    h1 Custom Object Table
+    h1 Pets Management
 
-    a(href="/update-cobj") Add/Update this table
+    include pets-form
 
+    h2 Pet List
     table
-      thead
+      tr
+        th Name
+        th Type
+        th Age
+        th Edit
+        th Delete
+      each pet in pets
         tr
-          th Name
-          th Type
-          th Age
-      tbody
-        if records.length
-          each item in records
-            tr
-              td= item.properties.pet_name
-              td= item.properties.pet_type
-              td= item.properties.age
-        else
-          tr
-            td(colspan="3") No records found
+          td= pet.properties.pet_name
+          td= pet.properties.pet_type
+          td= pet.properties.age
+          td 
+            button(onclick=`fillForm('${pet.id}', '${pet.properties.pet_name}', '${pet.properties.pet_type}', '${pet.properties.age}')`) Edit
+          td 
+            a(href=`/delete/${pet.id}`) Delete
+
+    .pagination
+      if after
+        a(href="/") Previous
+      if nextPage
+        a(href=`/?after=${nextPage}`) Next
+
+    script.
+      function fillForm(id, name, type, age) {
+        document.getElementById("id").value = id;
+        document.getElementById("pet_name").value = name;
+        document.getElementById("pet_type").value = type;
+        document.getElementById("age").value = age;
+        document.getElementById("form-title").innerText = "Update Pet";
+        document.getElementById("submit-btn").innerText = "Update";
+        document.getElementById("form-action").action = "/update";
+      }

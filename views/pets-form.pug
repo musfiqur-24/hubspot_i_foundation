@@ -1,21 +1,7 @@
-doctype html
-html
-  head
-    title= title
-    meta(name="viewport", content="width=device-width, initial-scale=1")
-    link(rel="stylesheet", href="/css/style.css")
-  body
-    h1= title
-
-    .form-wrapper
-      form(action=action method="POST")
-        label Pet Name
-        input(type="text", name="pet_name", value=(pet ? pet.properties.pet_name : ""))
-
-        label Pet Type
-        input(type="text", name="pet_type", value=(pet ? pet.properties.pet_type : ""))
-
-        label Age
-        input(type="text", name="age", value=(pet ? pet.properties.age : ""))
-
-        input(type="submit", value="Save")
+form#form-action(action="/create" method="POST")
+  h2#form-title Create Pet
+  input(type="hidden" id="id" name="id")
+  input(type="text" id="pet_name" name="pet_name" placeholder="Pet Name" required)
+  input(type="text" id="pet_type" name="pet_type" placeholder="Pet Type" required)
+  input(type="number" id="age" name="age" placeholder="Age" required)
+  button#submit-btn(type="submit") Create
